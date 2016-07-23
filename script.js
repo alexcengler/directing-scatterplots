@@ -5,8 +5,8 @@ d3.queue()
   .awaitAll(function (error, results) {
     if (error) { throw error; }
 
-    line1 = new LineChart(results[0], "#lineChart1", "tanf_fam", "Families on TANF",1500000,4500000)
-    line2 = new LineChart(results[0], "#lineChart2", "fam_child_pov", "Families in Poverty",4500000,7500000)
+    line1 = new LineChart(results[0], "#lineChart1", "tanf_fam", "Families on TANF",0,7500000)
+    line2 = new LineChart(results[0], "#lineChart2", "fam_child_pov", "Families in Poverty",0,7500000)
 
     d3.select('#stage1').on('click', function () {
         line1.stage1();
@@ -72,6 +72,9 @@ LineChart.prototype.stage1 = function() {
 
     data = chart.data.slice();
 
+    chart.svg.selectAll(".stage1").remove();
+    chart.svg.selectAll(".stage2").remove();
+
     chart.svg.append("g")
         .attr("transform", function(){ return "translate(0," + height + ")" })
         .attr("class", "axis")
@@ -107,7 +110,7 @@ LineChart.prototype.stage1 = function() {
     chart.svg.selectAll(".circ")
         .data(data, function(d){ return d.year }).enter()
         .append("circle")
-        .attr("class", "circ")
+        .attr("class", "circ stage1")
         .attr("cx", function(d){ return chart.xScale(d.year) })
         .attr("cy", function(d){ return chart.yScale(d[chart.yvar]) })
         .attr("r", 0)
@@ -121,7 +124,7 @@ LineChart.prototype.stage1 = function() {
 
     chart.svg.append("path")
         .datum(data)
-        .attr("class", "line")
+        .attr("class", "line stage1")
         .attr("d", line)
 
 };
@@ -131,11 +134,13 @@ LineChart.prototype.stage2 = function() {
     var chart = this;
     var data = chart.data;
 
+    chart.svg.selectAll(".stage2").remove();
+
     chart.svg.selectAll(".vline")
         .data(data, function(d){ return d.year }).enter()
-        
         .append("line")
-        .attr("class", "vline")
+        .attr("class", "vline stage2")
+        .transition().delay(1000)
         .attr("x1", function(d) { return chart.xScale(d.year); })
         .attr("x2", function(d) { return chart.xScale(d.year); })
         .attr("y1", function(d) { return chart.yScale(d[chart.yvar]); })
