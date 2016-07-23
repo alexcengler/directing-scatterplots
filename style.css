@@ -32,3 +32,10 @@
 #lineChart2 .vline {
 	stroke: red;
 }
+
+
+.fakething {
+	fill: none;
+	stroke: black;
+	stroke-width:2px;	
+}

@@ -15,15 +15,18 @@ d3.queue()
     });
 
     d3.select('#stage2').on('click', function () {
-        line1.stage2();
-        line2.stage2();
+
+        scatter = new DirectedScatterPlot()
+        scatter.stage2(results[0])
         textStage2();
+
     });
 
     d3.select('#stage3').on('click', function () {
         line1.stage3();
         line2.stage3();
         textStage3();
+
     });
 
   });
@@ -71,14 +74,14 @@ function LineChart(data, divID, yvar, title, ymin, ymax){
 
     chart.svg.append("g")
         .attr("transform", function(){ return "translate(0," + height + ")" })
-        .attr("class", "yAxis")
+        .attr("class", "xAxis")
         .call(chart.xAxis)
         .attr("opacity",0)
         .transition().duration(500)
         .attr("opacity",1);
 
     chart.svg.append("g")
-        .attr("class", "xAxis")
+        .attr("class", "yAxis")
         .call(chart.yAxis)
         .attr("opacity",0)
         .transition().duration(500)
@@ -112,10 +115,13 @@ LineChart.prototype.unstage = function(stageNumber){
     chart.svg.select(".yAxis")
         .style("fill","none");
 
-    for (var i = stageNumber; i < 3; i++) {
+    chart.svg.selectAll("*").interrupt();
+
+    for (var i = stageNumber; i < 5; i++) {
         var stageText = ".stage" + i
 
         chart.svg.selectAll(stageText).remove();
+
     };
 };
 
@@ -128,7 +134,6 @@ LineChart.prototype.stage1 = function() {
     chart.unstage(1)
 
     data = chart.data.slice();
-
 
     chart.svg.selectAll(".circ")
         .data(data, function(d){ return d.year }).enter()
@@ -168,28 +173,6 @@ LineChart.prototype.stage1 = function() {
 
 };
 
-
-
-LineChart.prototype.stage2 = function() {
-    
-    var chart = this;
-    var data = chart.data;
-
-    chart.unstage(2)
-
-    chart.svg.selectAll(".vline")
-        .data(data, function(d){ return d.year }).enter()
-        .append("line")
-        .attr("class", "vline stage2")
-        .transition().delay(1000)
-        .attr("x1", function(d) { return chart.xScale(d.year); })
-        .attr("x2", function(d) { return chart.xScale(d.year); })
-        .attr("y1", function(d) { return chart.yScale(d[chart.yvar]); })
-        .attr("y2", function(d) { return height })
-
-};
-
-
 LineChart.prototype.stage3 = function() {
     
     var chart = this;
@@ -200,14 +183,104 @@ LineChart.prototype.stage3 = function() {
     chart.svg.selectAll(".vline")
         .data(data, function(d){ return d.year }).enter()
         .append("line")
-        .attr("class", "vline stage3")
-        .transition().delay(1000)
-        .attr("x1", function(d) { return 100; })
-        .attr("x2", function(d) { return 200; })
+        .attr("class", "vline stage2")
+        .attr("x1", function(d) { return chart.xScale(d.year); })
+        .attr("x2", function(d) { return chart.xScale(d.year); })
         .attr("y1", function(d) { return chart.yScale(d[chart.yvar]); })
         .attr("y2", function(d) { return height })
+        .attr("opacity",0)
+        .transition().delay(function(d,i) { return i * 50}).duration(1000)
+        .attr("opacity",1);
 
 };
+
+
+
+
+function DirectedScatterPlot(data) {
+    
+    var chart = this;
+
+    chart.SVG = d3.select("#scatterPlot")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", width + margin.top + margin.bottom)
+
+    chart.svg = d3.select("#scatterPlot svg")
+        .append("g")
+        .attr("transform", function(){ return "translate(" + margin.left + "," + margin.top + ")" });
+
+    chart.Scale = d3.scaleLinear()
+        .domain([0,7500000])
+        .range([0, width])
+        .nice();
+
+    chart.xAxis = d3.axisBottom(chart.Scale).ticks(5, "s");
+    chart.yAxis = d3.axisLeft(chart.Scale).ticks(5, "s");
+
+
+};
+
+DirectedScatterPlot.prototype.stage2 = function (data) {
+
+    var chart = this;
+    var full = data.slice();
+
+    chart.SVG 
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", width + margin.top + margin.bottom)
+
+    chart.svg.append("g")
+        .attr("transform", function(){ return "translate(0," + width + ")" })
+        .attr("class", "axis")
+        .call(chart.xAxis);
+
+    chart.svg.append("g")
+        .attr("class", "axis")
+        .call(chart.yAxis);
+
+    chart.svg
+        .append("text")
+        .attr("class", "yAxisLabel")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -(width / 2))
+        .attr("y", -(margin.left * 0.75))
+        .style("text-anchor", "middle")
+        .html("Families with Children on TANF");
+
+    chart.svg
+        .append("text")
+        .attr("class", "xAxisLabel")
+        .attr("x", width / 2)
+        .attr("y", width + margin.bottom * 0.75)
+        .style("text-anchor", "middle")
+        .html("Impoverished Families with Children");
+
+
+    chart.svg.selectAll(".circ")
+        .data(full, function(d){ return d.year }).enter()
+        .append("circle")
+        .attr("class", "circ")
+        .attr("r", 0)
+        .attr("cx", function(d){ return chart.Scale(d.fam_child_pov) })
+        .attr("cy", function(d){ return chart.Scale(d.tanf_fam) })
+    .transition()
+        .delay(function (d,i){ return (i * 50) })
+        .duration(500)
+        .attr("r", 5);
+};
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -234,3 +307,4 @@ var textStage3 = function(){
         .append("h4")
         .html("And now a whole different thing")
 };
+
