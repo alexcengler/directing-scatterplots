@@ -20,6 +20,11 @@ d3.queue()
         textStage2();
     });
 
+    d3.select('#stage3').on('click', function () {
+        line1.stage3();
+        line2.stage3();
+        textStage3();
+    });
 
   });
 
@@ -64,27 +69,16 @@ function LineChart(data, divID, yvar, title, ymin, ymax){
     chart.xAxis = d3.axisBottom(chart.xScale).ticks(10).tickFormat(d3.format(".0f"));
     chart.yAxis = d3.axisLeft(chart.yScale).ticks(5, "s");
 
-};
-
-
-LineChart.prototype.stage1 = function() {
-    var chart = this;
-
-    data = chart.data.slice();
-
-    chart.svg.selectAll(".stage1").remove();
-    chart.svg.selectAll(".stage2").remove();
-
     chart.svg.append("g")
         .attr("transform", function(){ return "translate(0," + height + ")" })
-        .attr("class", "axis")
+        .attr("class", "yAxis")
         .call(chart.xAxis)
         .attr("opacity",0)
         .transition().duration(500)
         .attr("opacity",1);
 
     chart.svg.append("g")
-        .attr("class", "axis")
+        .attr("class", "xAxis")
         .call(chart.yAxis)
         .attr("opacity",0)
         .transition().duration(500)
@@ -107,6 +101,35 @@ LineChart.prototype.stage1 = function() {
         .style("text-anchor", "middle")
         .html(chart.title);
 
+};
+
+LineChart.prototype.unstage = function(stageNumber){
+
+    var chart = this;
+
+    chart.svg.select(".xAxis")
+        .style("fill","none");
+    chart.svg.select(".yAxis")
+        .style("fill","none");
+
+    for (var i = stageNumber; i < 3; i++) {
+        var stageText = ".stage" + i
+
+        chart.svg.selectAll(stageText).remove();
+    };
+};
+
+
+
+
+LineChart.prototype.stage1 = function() {
+    var chart = this;
+
+    chart.unstage(1)
+
+    data = chart.data.slice();
+
+
     chart.svg.selectAll(".circ")
         .data(data, function(d){ return d.year }).enter()
         .append("circle")
@@ -123,7 +146,6 @@ LineChart.prototype.stage1 = function() {
         .y(function(d) { return chart.yScale(d[chart.yvar]); });
 
     chart.svg.append("path")
-        //.datum(data)
         .attr("class", "line stage1")
         .transition().duration(1700)
         .attrTween('d', function() {
@@ -137,16 +159,23 @@ LineChart.prototype.stage1 = function() {
             };
         })
 
-
+    chart.svg.select(".xAxis")
+        .transition().delay(2000)
+        .style("fill","orange");
+    chart.svg.select(".yAxis")
+        .transition().delay(2000)
+        .style("fill","purple");
 
 };
+
+
 
 LineChart.prototype.stage2 = function() {
     
     var chart = this;
     var data = chart.data;
 
-    chart.svg.selectAll(".stage2").remove();
+    chart.unstage(2)
 
     chart.svg.selectAll(".vline")
         .data(data, function(d){ return d.year }).enter()
@@ -161,6 +190,24 @@ LineChart.prototype.stage2 = function() {
 };
 
 
+LineChart.prototype.stage3 = function() {
+    
+    var chart = this;
+    var data = chart.data;
+
+    chart.unstage(3)
+
+    chart.svg.selectAll(".vline")
+        .data(data, function(d){ return d.year }).enter()
+        .append("line")
+        .attr("class", "vline stage3")
+        .transition().delay(1000)
+        .attr("x1", function(d) { return 100; })
+        .attr("x2", function(d) { return 200; })
+        .attr("y1", function(d) { return chart.yScale(d[chart.yvar]); })
+        .attr("y2", function(d) { return height })
+
+};
 
 
 
@@ -169,7 +216,7 @@ var textStage1 = function(){
     d3.select("#narrative").html("")
     d3.select("#narrative")
         .append("h4")
-        .html("Let's start with with two normal lines charts...")
+        .html("Let's start with with two normal lines charts. Note we have years on the <font color ='orange'>x-axes</font> and quantitative measures of poverty on the <font color ='purple'>y-axes</font>.")
 }
 
 var textStage2 = function(){
@@ -177,7 +224,13 @@ var textStage2 = function(){
     d3.select("#narrative").html("")
     d3.select("#narrative")
         .append("h4")
-        .html("And now something esle")
-}
+        .html("And now something else")
+};
 
+var textStage3 = function(){
 
+    d3.select("#narrative").html("")
+    d3.select("#narrative")
+        .append("h4")
+        .html("And now a whole different thing")
+};
