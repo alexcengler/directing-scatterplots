@@ -114,18 +114,30 @@ LineChart.prototype.stage1 = function() {
         .attr("cx", function(d){ return chart.xScale(d.year) })
         .attr("cy", function(d){ return chart.yScale(d[chart.yvar]) })
         .attr("r", 0)
-        .transition().delay(function(d,i) { return i * 50})
-        .duration(500)
-        .attr("r", 3)
+        .transition()
+        .delay(function(d,i) { return 200 + (i * 50) })
+        .attr("r", 5)
 
     var line = d3.line()
         .x(function(d) { return chart.xScale(d.year); })
         .y(function(d) { return chart.yScale(d[chart.yvar]); });
 
     chart.svg.append("path")
-        .datum(data)
+        //.datum(data)
         .attr("class", "line stage1")
-        .attr("d", line)
+        .transition().duration(1700)
+        .attrTween('d', function() {
+
+            var lineInterpolate = d3.scaleQuantile()
+                .domain([0,1])
+                .range(d3.range(1, data.length + 1));   
+
+            return function(t) {
+                return line(data.slice(0, lineInterpolate(t)));
+            };
+        })
+
+
 
 };
 
