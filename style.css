@@ -1,0 +1,34 @@
+
+
+
+.container {
+	margin: 10px;
+}
+
+/*svg {
+	background: #dddddd;
+}*/
+
+#buttonsRow {
+	margin: 20px;
+}
+
+
+.line {
+ 	fill: none;
+	stroke: black;
+	stroke-width:2px;
+}
+
+.vline { 
+ 	fill: none;
+	stroke-width:2px;
+}
+
+#lineChart1 .vline {
+	stroke: blue;
+}
+
+#lineChart2 .vline {
+	stroke: red;
+}
